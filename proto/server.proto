@@ -1,0 +1,162 @@
+syntax = "proto3";
+
+import "google/protobuf/timestamp.proto";
+option java_multiple_files = false;
+package com.hg.socket.server.protocol;
+
+message Void {
+
+}
+
+message EnterGameRet {
+  int64 room_id = 1;
+  int32 current_count = 2;
+}
+
+// server:alert
+message Alert {
+  string code = 1;
+  int32 type = 2; // 0:popup, 1:toast
+  string message_en_US = 3;
+  string message_zh_CN = 4;
+  string message_zh_TW = 5;
+}
+
+message PlaceBetRet {
+  int64 bet_id = 1;
+}
+
+message CancelBetRet {
+  bool status = 1;
+}
+
+message CashoutRet {
+  bool status = 1;
+}
+
+message CashoutBroadcastItem {
+  string user_name = 1;
+  int64 room_id = 2;
+  int64 round_id = 3;
+  string amount = 4;
+  string multiplier = 5;
+  string panel = 6;
+  string cashout_type = 7;
+}
+
+message CashoutBroadcastBatch {
+  repeated CashoutBroadcastItem items = 1;
+}
+
+message SnapshotRet {
+  int64 round_id = 1;
+  string phase = 2;
+  google.protobuf.Timestamp phase_end_at = 3;
+  repeated PanelBetDetail bet_details = 4;
+}
+
+message PanelBetDetail {
+  string panel = 1;
+  string bet_amount = 2;
+  int64 bet_id = 3;
+  bool is_cashout = 4;
+  bool is_half_cashed_out = 5;
+  string remaining_bet_amount = 6;
+  string half_cashout_payout = 7;
+  string cashout_type = 8;
+  string auto_cashout_at = 9;
+}
+
+message BetDetail {
+  string bet_amount = 1;
+  bool is_cashout = 2;
+}
+
+// server:room:snapshot
+message RoundSnapshot {
+  int64 round_id = 1;
+  double crash_point = 2;
+  double current_multiplier = 3;
+  string phase = 4;
+}
+
+
+// server:game:cashout:batch
+// 下注 + cashout
+// BetPlaced (BetService): {user_name, bet_amount, room_id, round_id}
+// Cashout (CashoutService): {user_name, bet_amount, cashout_amount, room_id, round_id}
+message OtherBroadcastBatch {
+  repeated OtherBroadcastItem items = 1;
+  int64 room_id = 2;
+  int64 round_id = 3;
+}
+
+message OtherBroadcastItem {
+  string user_name = 1;
+  string bet_amount = 2;
+  optional string cashout_amount = 3;
+}
+
+// server:room:snapshot
+// Tick: (RoundBroadcaster) panel_bet_details ❌
+// User request: (SnapshotService) panel_bet_details ✅
+message Snapshot {
+  int64 roomId = 1;
+  int64 roundId = 2;
+  RoomPhase room_phase = 3;
+  int32 player_count = 6;
+  string total_bet = 7;
+  repeated OtherBroadcastItem leaderboard_snapshot = 8;
+  repeated string crash_point_history = 9;
+  repeated PanelBetDetail panel_bet_details = 10;
+  optional GameStatus game_status = 11;
+}
+
+// server:player:cashout push envelope (wire-compatible with crashgame-cg02-socket message Cashout)
+message PlayerCashout {
+  TransactionDetail detail = 1;
+}
+
+// server:player:bet
+message TransactionDetail {
+  optional string bet_amount = 1;
+  int64 bet_id = 2;
+  bool is_cashout = 3;
+  optional string payout_amount = 4;
+  optional string multiplier = 5;
+  optional bool is_success = 6;
+  optional string cashout_type = 7;
+}
+
+// server:room:game:history
+message GameHistory {
+  repeated string crash_point = 1;
+}
+
+// server:room:game:phase
+// once every phase change (not include grace)
+message RoomPhase {
+  string phase = 1;
+  google.protobuf.Timestamp phase_end_at = 2;
+  int64 round_id = 3;
+}
+
+// server:room:game:status
+// once every 100s
+message GameStatus {
+  string multiplier = 1;
+  bool has_crash_point = 2;
+}
+
+// server:balance:changed
+message BalanceChanged {
+  string balance = 1;
+  string currency = 2;
+}
+
+// server:room:status
+// once when player connect or disconnect or place bet or cancel bet
+message RoomStatus {
+  int32 player_count = 1;
+  string total_bet = 2;
+}

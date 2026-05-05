@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+option java_multiple_files = false;
+package com.hg.socket.server.protocol;
+
+message Void {
+
+}
+
+// client:game:enter
+message EnterGame {
+}
+
+// client:bet:place
+message PlaceBet {
+  string bet_amount = 1;
+  string currency = 2;
+  int64 round_id = 3;
+  int64 room_id = 4;
+  string cashoutType = 5;
+  string auto_cashout_at = 6;
+  string panel = 7;
+}
+
+// client:bet:cancel
+message CancelBet {
+  int64 round_id = 1;
+  int64 room_id = 2;
+  int64 bet_id = 3;
+}
+
+// client:bet:cashout
+message Cashout {
+  int64 round_id = 1;
+  int64 room_id = 2;
+  int64 bet_id = 3;
+  string cashout_type = 4;
+}
+
+// client:room:snapshot
+message Snapshot {
+  int64 room_id = 1;
+}
