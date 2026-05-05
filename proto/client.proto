@@ -30,7 +30,7 @@ message CancelBet {
 }
 
 // client:bet:cashout
-message Cashout {
+message CashoutReq {
   int64 round_id = 1;
   int64 room_id = 2;
   int64 bet_id = 3;
@@ -38,6 +38,6 @@ message Cashout {
 }
 
 // client:room:snapshot
-message Snapshot {
+message SnapshotReq {
   int64 room_id = 1;
 }

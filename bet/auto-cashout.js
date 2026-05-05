@@ -17,11 +17,7 @@ const {
   enterGameAckLogFields,
   betIdStringFromPlaceBetRet,
 } = require("../helpers/cgSocketHelpers");
-const protobuf = require("protobufjs");
-const path = require("path");
 const { toBuf } = require("../helpers/commons");
-
-const PROTO_DIR = path.resolve(__dirname, "../proto");
 
 // The multiplier at which the server should auto-cash out.
 const AUTO_CASHOUT_AT = process.env.CG02_AUTO_CASHOUT_AT_TEST || "1.20";
@@ -53,7 +49,7 @@ function createCashoutWait(socket, types, wantBetIdStr) {
     onCashout = (data) => {
       if (settled) return;
       try {
-        const envelope = types.PlayerCashout.decode(toBuf(data));
+        const envelope = types.ServerCashout.decode(toBuf(data));
         const decoded = envelope.detail;
         if (!decoded) return;
         const obj = types.TransactionDetail.toObject(decoded, {
@@ -98,17 +94,7 @@ function createCashoutWait(socket, types, wantBetIdStr) {
 (async () => {
   validateRequiredConfig();
 
-  const rootServer = await protobuf.load(path.join(PROTO_DIR, "server.proto"));
-  const TransactionDetail = rootServer.lookupType(
-    "com.hg.socket.server.protocol.TransactionDetail"
-  );
-  const PlayerCashout = rootServer.lookupType(
-    "com.hg.socket.server.protocol.PlayerCashout"
-  );
-
   const types = await loadProtoTypes();
-  types.TransactionDetail = TransactionDetail;
-  types.PlayerCashout = PlayerCashout;
 
   const socket = buildSocket();
   await waitConnected(socket);

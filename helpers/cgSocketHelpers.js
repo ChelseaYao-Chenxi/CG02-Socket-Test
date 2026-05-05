@@ -25,12 +25,19 @@ async function loadProtoTypes() {
   return {
     EnterGame: rootClient.lookupType("com.hg.socket.server.protocol.EnterGame"),
     /** client:room:snapshot request body ({ room_id }) */
-    Snapshot: rootClient.lookupType("com.hg.socket.server.protocol.Snapshot"),
+    SnapshotReq: rootClient.lookupType(
+      "com.hg.socket.server.protocol.SnapshotReq"
+    ),
     /** server:room:snapshot payload / snapshot ack ({ roomId, roundId, room_phase, … }) */
     ServerSnapshot: rootServer.lookupType("com.hg.socket.server.protocol.Snapshot"),
     RoomPhase: rootServer.lookupType("com.hg.socket.server.protocol.RoomPhase"),
     PlaceBet: rootClient.lookupType("com.hg.socket.server.protocol.PlaceBet"),
-    Cashout: rootClient.lookupType("com.hg.socket.server.protocol.Cashout"),
+    CashoutReq: rootClient.lookupType("com.hg.socket.server.protocol.CashoutReq"),
+    /** server:player:cashout push { detail } */
+    ServerCashout: rootServer.lookupType("com.hg.socket.server.protocol.Cashout"),
+    TransactionDetail: rootServer.lookupType(
+      "com.hg.socket.server.protocol.TransactionDetail"
+    ),
     EnterGameRet: rootServer.lookupType("com.hg.socket.server.protocol.EnterGameRet"),
     SnapshotRet: rootServer.lookupType("com.hg.socket.server.protocol.SnapshotRet"),
     RoundSnapshot: rootServer.lookupType(
@@ -128,7 +135,7 @@ async function enterGame(socket, types, timeoutMs = ACK_TIMEOUT_MS) {
 }
 
 async function getSnapshot(socket, types, roomId, timeoutMs = ACK_TIMEOUT_MS) {
-  const encodedB64 = encodeToBase64(types.Snapshot, { roomId });
+  const encodedB64 = encodeToBase64(types.SnapshotReq, { roomId });
   const ack = await emitWithAck(socket, "client:room:snapshot", encodedB64, {
     timeoutMs,
   });
@@ -258,7 +265,7 @@ async function placeBet(socket, types, payload, timeoutMs = ACK_TIMEOUT_MS) {
 }
 
 async function cashout(socket, types, payload, timeoutMs = ACK_TIMEOUT_MS) {
-  const encodedB64 = encodeToBase64(types.Cashout, payload);
+  const encodedB64 = encodeToBase64(types.CashoutReq, payload);
   const ack = await emitWithAck(socket, "client:bet:cashout", encodedB64, {
     timeoutMs,
   });

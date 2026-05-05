@@ -117,7 +117,7 @@ Broadcast to entire room every **100ms**. Always contains current room state.
 {
   "player_count": 5,
   "total_bet": "12.50",
-  "items": [[FRONTEND_SOCKET_API.md](FRONTEND_SOCKET_API.md)
+  "items": [
     {
       "user_name": "Alice",
       "bet_amount": "1.00",
@@ -154,7 +154,7 @@ Sent to the betting player only after the wallet transaction completes.
 ---
 
 ### `server:player:cashout`
-Sent to the cashing-out player only. Payload is wrapped in a `detail` object.
+Sent to the cashing-out player only. Protobuf: `Cashout { detail: TransactionDetail }`.
 
 ```json
 {
